@@ -144,28 +144,37 @@
     const database = firebase.database();
 
     function attachEvents() {
-        document.querySelectorAll('.team-name').forEach(input => {
-            input.addEventListener('input', function() {
-                const val = this.value;
-                const opts = document.getElementById('countries').options;
-                const img = this.parentElement.querySelector('.flag-img');
-                let found = false;
-                for (let i = 0; i < opts.length; i++) {
-                    if (opts[i].value === val) {
-                        img.src = `https://flagcdn.com/${opts[i].getAttribute('data-code')}.svg`;
-                        img.style.display = 'block';
-                        found = true;
-                        break;
-                    }
+    document.querySelectorAll('.team-name').forEach(input => {
+        input.addEventListener('input', function() {
+            const val = this.value;
+            const opts = document.getElementById('countries').options;
+            const img = this.parentElement.querySelector('.flag-img');
+            
+            let found = false;
+            // Проверяем, есть ли такой вариант в списке
+            for (let i = 0; i < opts.length; i++) {
+                if (opts[i].value === val) {
+                    img.src = `https://flagcdn.com/${opts[i].getAttribute('data-code')}.svg`;
+                    img.style.display = 'block';
+                    found = true;
+                    break;
                 }
-                if (!found) img.style.display = 'none';
-                saveToFirebase();
-            });
+            }
+            
+            // Если поле очистили или ввели ерунду — прячем флаг
+            if (!found || val === "") {
+                img.style.display = 'none';
+                img.src = "";
+            }
+            
+            saveToFirebase(); // Сохраняем пустое состояние в базу
         });
-        document.querySelectorAll('.score').forEach(input => {
-            input.addEventListener('input', () => { checkWinnerAndAdvance(input.closest('.match-card')); });
-        });
-    }
+    });
+
+    document.querySelectorAll('.score').forEach(input => {
+        input.addEventListener('input', () => { checkWinnerAndAdvance(input.closest('.match-card')); });
+    });
+}
 
     function saveToFirebase() {
         const state = {};
