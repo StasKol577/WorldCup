@@ -3,311 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Road to Budapest - Live</title>
+    <title>Турнирная сетка 1/16</title>
     
-    <!-- Подключаем Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        body {
-            background-color: #0b1120;
-            color: white;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        
+        body { background-color: #0b1120; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
         .scroll-wrapper { width: 100%; overflow-x: auto; padding: 20px 0; }
-        .tournament { position: relative; display: flex; gap: 30px; width: max-content; padding: 20px; }
+        .tournament { position: relative; display: flex; gap: 20px; width: max-content; padding: 20px; }
         #lines-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
         .col-wrapper { display: flex; flex-direction: column; }
-        
-        .col-header {
-            text-align: center; font-weight: bold; color: #94a3b8; font-size: 14px;
-            margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; height: 20px;
-        }
-
+        .col-header { text-align: center; font-weight: bold; color: #94a3b8; font-size: 14px; margin-bottom: 20px; text-transform: uppercase; height: 20px; }
         .col { display: flex; flex-direction: column; justify-content: space-around; gap: 15px; flex-grow: 1; }
         .center-col { justify-content: center; gap: 80px; }
-
-        .match-card {
-            background-color: #1e293b; border: 2px solid #3b82f6; border-radius: 8px;
-            padding: 8px; width: 180px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); position: relative; z-index: 1;
-        }
-        
-        .match-title { text-align: center; font-size: 12px; font-weight: bold; color: #60a5fa; margin-bottom: 6px; text-transform: uppercase; }
+        .match-card { background-color: #1e293b; border: 2px solid #3b82f6; border-radius: 8px; padding: 8px; width: 180px; position: relative; z-index: 1; }
         .team-row { display: flex; align-items: center; margin-bottom: 4px; }
-        .team-row:last-child { margin-bottom: 0; }
-        
-        .flag-container {
-            width: 24px; height: 16px; background-color: #334155; margin-right: 5px;
-            display: flex; justify-content: center; align-items: center; cursor: pointer;
-            overflow: hidden; border-radius: 2px; flex-shrink: 0;
-        }
-        .flag-container img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .flag-plus { font-size: 10px; color: #94a3b8; }
-        .flag-input { display: none; }
-        
-        .team-name, .score {
-            border: 1px solid #475569; background: #0f172a; color: white;
-            padding: 4px; border-radius: 3px; font-size: 12px; outline: none;
-        }
-        .team-name { flex-grow: 1; width: 50px; margin-right: 5px; }
-        .score { width: 25px; text-align: center; }
+        .flag-container { width: 24px; height: 16px; background-color: #334155; margin-right: 5px; display: flex; justify-content: center; align-items: center; border-radius: 2px; }
+        .flag-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .team-name { flex-grow: 1; width: 50px; margin-right: 5px; border: 1px solid #475569; background: #0f172a; color: white; padding: 4px; border-radius: 3px; }
+        .score { width: 25px; text-align: center; border: 1px solid #475569; background: #0f172a; color: white; padding: 4px; border-radius: 3px; }
         .winner { font-weight: bold; color: #fbbf24; border-color: #fbbf24; }
     </style>
 </head>
 <body>
 
-    <div class="scroll-wrapper">
-        <div class="tournament">
-            <svg id="lines-svg"></svg>
-
-            <!-- Левая часть -->
-            <div class="col-wrapper"><div class="col-header">1/16</div><div class="col" id="col-16-l"></div></div>
-            <div class="col-wrapper"><div class="col-header">1/8</div><div class="col" id="col-8-l"></div></div>
-            <div class="col-wrapper"><div class="col-header">1/4</div><div class="col" id="col-4-l"></div></div>
-            <div class="col-wrapper"><div class="col-header">1/2</div><div class="col" id="col-2-l"></div></div>
-            
-            <!-- Центр -->
-            <div class="col-wrapper">
-                <div class="col-header"></div>
-                <div class="col center-col"><div id="col-final"></div><div id="col-third"></div></div>
-            </div>
-            
-            <!-- Правая часть -->
-            <div class="col-wrapper"><div class="col-header">1/2</div><div class="col" id="col-2-r"></div></div>
-            <div class="col-wrapper"><div class="col-header">1/4</div><div class="col" id="col-4-r"></div></div>
-            <div class="col-wrapper"><div class="col-header">1/8</div><div class="col" id="col-8-r"></div></div>
-            <div class="col-wrapper"><div class="col-header">1/16</div><div class="col" id="col-16-r"></div></div>
+<div class="scroll-wrapper">
+    <div class="tournament">
+        <svg id="lines-svg"></svg>
+        <div class="col-wrapper"><div class="col-header">1/16</div><div class="col" id="col-16-l"></div></div>
+        <div class="col-wrapper"><div class="col-header">1/8</div><div class="col" id="col-8-l"></div></div>
+        <div class="col-wrapper"><div class="col-header">1/4</div><div class="col" id="col-4-l"></div></div>
+        <div class="col-wrapper"><div class="col-header">1/2</div><div class="col" id="col-2-l"></div></div>
+        <div class="col-wrapper">
+            <div class="col-header"></div>
+            <div class="col center-col"><div id="col-final"></div><div id="col-third"></div></div>
         </div>
+        <div class="col-wrapper"><div class="col-header">1/2</div><div class="col" id="col-2-r"></div></div>
+        <div class="col-wrapper"><div class="col-header">1/4</div><div class="col" id="col-4-r"></div></div>
+        <div class="col-wrapper"><div class="col-header">1/8</div><div class="col" id="col-8-r"></div></div>
+        <div class="col-wrapper"><div class="col-header">1/16</div><div class="col" id="col-16-r"></div></div>
     </div>
+</div>
 
-    <script>
-        const bracketConfig = [
-            { id: 'm1', next: 'm17', slot: 0, col: 'col-16-l' }, { id: 'm2', next: 'm17', slot: 1, col: 'col-16-l' },
-            { id: 'm3', next: 'm18', slot: 0, col: 'col-16-l' }, { id: 'm4', next: 'm18', slot: 1, col: 'col-16-l' },
-            { id: 'm5', next: 'm19', slot: 0, col: 'col-16-l' }, { id: 'm6', next: 'm19', slot: 1, col: 'col-16-l' },
-            { id: 'm7', next: 'm20', slot: 0, col: 'col-16-l' }, { id: 'm8', next: 'm20', slot: 1, col: 'col-16-l' },
-            
-            { id: 'm17', next: 'm25', slot: 0, col: 'col-8-l' }, { id: 'm18', next: 'm25', slot: 1, col: 'col-8-l' },
-            { id: 'm19', next: 'm26', slot: 0, col: 'col-8-l' }, { id: 'm20', next: 'm26', slot: 1, col: 'col-8-l' },
-            
-            { id: 'm25', next: 'm29', slot: 0, col: 'col-4-l' }, { id: 'm26', next: 'm29', slot: 1, col: 'col-4-l' },
-            
-            { id: 'm29', next: 'm31', slot: 0, col: 'col-2-l' }, 
+<datalist id="countries">
+    <option value="Аргентина" data-code="ar">
+    <option value="Португалия" data-code="pt">
+    <option value="Германия" data-code="de">
+    <option value="Франция" data-code="fr">
+    <option value="Бразилия" data-code="br">
+    </datalist>
 
-            { id: 'm9', next: 'm21', slot: 0, col: 'col-16-r' }, { id: 'm10', next: 'm21', slot: 1, col: 'col-16-r' },
-            { id: 'm11', next: 'm22', slot: 0, col: 'col-16-r' }, { id: 'm12', next: 'm22', slot: 1, col: 'col-16-r' },
-            { id: 'm13', next: 'm23', slot: 0, col: 'col-16-r' }, { id: 'm14', next: 'm23', slot: 1, col: 'col-16-r' },
-            { id: 'm15', next: 'm24', slot: 0, col: 'col-16-r' }, { id: 'm16', next: 'm24', slot: 1, col: 'col-16-r' },
-            
-            { id: 'm21', next: 'm27', slot: 0, col: 'col-8-r' }, { id: 'm22', next: 'm27', slot: 1, col: 'col-8-r' },
-            { id: 'm23', next: 'm28', slot: 0, col: 'col-8-r' }, { id: 'm24', next: 'm28', slot: 1, col: 'col-8-r' },
-            
-            { id: 'm27', next: 'm30', slot: 0, col: 'col-4-r' }, { id: 'm28', next: 'm30', slot: 1, col: 'col-4-r' },
-            
-            { id: 'm30', next: 'm31', slot: 1, col: 'col-2-r' }, 
+<script>
+    const bracketConfig = [
+        { id: 'm1', next: 'm17', slot: 0, col: 'col-16-l' }, { id: 'm2', next: 'm17', slot: 1, col: 'col-16-l' },
+        { id: 'm3', next: 'm18', slot: 0, col: 'col-16-l' }, { id: 'm4', next: 'm18', slot: 1, col: 'col-16-l' },
+        { id: 'm5', next: 'm19', slot: 0, col: 'col-16-l' }, { id: 'm6', next: 'm19', slot: 1, col: 'col-16-l' },
+        { id: 'm7', next: 'm20', slot: 0, col: 'col-16-l' }, { id: 'm8', next: 'm20', slot: 1, col: 'col-16-l' },
+        { id: 'm17', next: 'm25', slot: 0, col: 'col-8-l' }, { id: 'm18', next: 'm25', slot: 1, col: 'col-8-l' },
+        { id: 'm19', next: 'm26', slot: 0, col: 'col-8-l' }, { id: 'm20', next: 'm26', slot: 1, col: 'col-8-l' },
+        { id: 'm25', next: 'm29', slot: 0, col: 'col-4-l' }, { id: 'm26', next: 'm29', slot: 1, col: 'col-4-l' },
+        { id: 'm29', next: 'm31', slot: 0, col: 'col-2-l' }, 
+        { id: 'm9', next: 'm21', slot: 0, col: 'col-16-r' }, { id: 'm10', next: 'm21', slot: 1, col: 'col-16-r' },
+        { id: 'm11', next: 'm22', slot: 0, col: 'col-16-r' }, { id: 'm12', next: 'm22', slot: 1, col: 'col-16-r' },
+        { id: 'm13', next: 'm23', slot: 0, col: 'col-16-r' }, { id: 'm14', next: 'm23', slot: 1, col: 'col-16-r' },
+        { id: 'm15', next: 'm24', slot: 0, col: 'col-16-r' }, { id: 'm16', next: 'm24', slot: 1, col: 'col-16-r' },
+        { id: 'm21', next: 'm27', slot: 0, col: 'col-8-r' }, { id: 'm22', next: 'm27', slot: 1, col: 'col-8-r' },
+        { id: 'm23', next: 'm28', slot: 0, col: 'col-8-r' }, { id: 'm24', next: 'm28', slot: 1, col: 'col-8-r' },
+        { id: 'm27', next: 'm30', slot: 0, col: 'col-4-r' }, { id: 'm28', next: 'm30', slot: 1, col: 'col-4-r' },
+        { id: 'm30', next: 'm31', slot: 1, col: 'col-2-r' }, 
+        { id: 'm31', next: null, slot: null, col: 'col-final', title: 'Финал' },
+        { id: 'm32', next: null, slot: null, col: 'col-third', title: 'За 3-е место' }
+    ];
 
-            { id: 'm31', next: null, slot: null, col: 'col-final', title: 'Финал' },
-            { id: 'm32', next: null, slot: null, col: 'col-third', title: 'За 3-е место' }
-        ];
-
-        function generateBracket() {
-            bracketConfig.forEach(match => {
-                const titleHtml = match.title ? `<div class="match-title">${match.title}</div>` : '';
-                const cardHtml = `
-                    <div class="match-card" id="${match.id}" data-next="${match.next || ''}" data-slot="${match.slot !== null ? match.slot : ''}">
-                        ${titleHtml}
-                        <div class="team-row">
-                            <label class="flag-container"><input type="file" class="flag-input" accept="image/*"><img class="flag-img" src=""><span class="flag-plus">+</span></label>
-                            <input type="text" class="team-name" placeholder="Команда 1">
-                            <input type="number" class="score" placeholder="-">
-                        </div>
-                        <div class="team-row">
-                            <label class="flag-container"><input type="file" class="flag-input" accept="image/*"><img class="flag-img" src=""><span class="flag-plus">+</span></label>
-                            <input type="text" class="team-name" placeholder="Команда 2">
-                            <input type="number" class="score" placeholder="-">
-                        </div>
+    function generateBracket() {
+        bracketConfig.forEach(match => {
+            const cardHtml = `
+                <div class="match-card" id="${match.id}" data-next="${match.next || ''}" data-slot="${match.slot !== null ? match.slot : ''}">
+                    ${match.title ? `<div style="text-align:center; font-size:12px; color:#60a5fa">${match.title}</div>` : ''}
+                    <div class="team-row">
+                        <div class="flag-container"><img class="flag-img" src=""></div>
+                        <input type="text" class="team-name" list="countries" placeholder="Команда">
+                        <input type="number" class="score" placeholder="-">
                     </div>
-                `;
-                document.getElementById(match.col).innerHTML += cardHtml;
+                    <div class="team-row">
+                        <div class="flag-container"><img class="flag-img" src=""></div>
+                        <input type="text" class="team-name" list="countries" placeholder="Команда">
+                        <input type="number" class="score" placeholder="-">
+                    </div>
+                </div>`;
+            document.getElementById(match.col).innerHTML += cardHtml;
+        });
+        attachEvents();
+    }
+
+    const firebaseConfig = { databaseURL: "https://sffh-92a72-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    function attachEvents() {
+        document.querySelectorAll('.team-name').forEach(input => {
+            input.addEventListener('input', function() {
+                const val = this.value;
+                const opts = document.getElementById('countries').options;
+                const img = this.parentElement.querySelector('.flag-img');
+                let found = false;
+                for (let i = 0; i < opts.length; i++) {
+                    if (opts[i].value === val) {
+                        img.src = `https://flagcdn.com/${opts[i].getAttribute('data-code')}.svg`;
+                        img.style.display = 'block';
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) img.style.display = 'none';
+                saveToFirebase();
             });
-            attachEvents(); 
+        });
+        document.querySelectorAll('.score').forEach(input => {
+            input.addEventListener('input', () => { checkWinnerAndAdvance(input.closest('.match-card')); });
+        });
+    }
+
+    function saveToFirebase() {
+        const state = {};
+        document.querySelectorAll('.match-card').forEach(card => {
+            const names = card.querySelectorAll('.team-name');
+            const scores = card.querySelectorAll('.score');
+            const flags = card.querySelectorAll('.flag-img');
+            state[card.id] = { n1: names[0].value, s1: scores[0].value, f1: flags[0].src, n2: names[1].value, s2: scores[1].value, f2: flags[1].src };
+        });
+        database.ref('worldCupState').set(state);
+    }
+
+    database.ref('worldCupState').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            document.querySelectorAll('.match-card').forEach(card => {
+                const d = data[card.id];
+                if (!d) return;
+                const names = card.querySelectorAll('.team-name');
+                const scores = card.querySelectorAll('.score');
+                const flags = card.querySelectorAll('.flag-img');
+                names[0].value = d.n1; scores[0].value = d.s1; flags[0].src = d.f1; flags[0].style.display = d.f1 ? 'block' : 'none';
+                names[1].value = d.n2; scores[1].value = d.s2; flags[1].src = d.f2; flags[1].style.display = d.f2 ? 'block' : 'none';
+            });
+            drawLines();
+        }
+    });
+
+    function checkWinnerAndAdvance(card) {
+        const s = card.querySelectorAll('.score');
+        const n = card.querySelectorAll('.team-name');
+        const f = card.querySelectorAll('.flag-img');
+        const nextId = card.getAttribute('data-next');
+        const slot = parseInt(card.getAttribute('data-slot'));
+        
+        let win = -1;
+        if (s[0].value !== "" && s[1].value !== "") {
+            win = parseInt(s[0].value) > parseInt(s[1].value) ? 0 : 1;
         }
 
-        // ==========================================
-        // БЛОК FIREBASE
-        // ==========================================
-        const firebaseConfig = {
-            // ВСТАВЬ СВОЮ ССЫЛКУ НИЖЕ ВМЕСТО МОЕЙ! Оставь кавычки!
-            databaseURL: "https://sffh-92a72-default-rtdb.firebaseio.com/"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        
-        let isDrawing = false; 
+        if (nextId && win !== -1) {
+            const nextCard = document.getElementById(nextId);
+            const nextN = nextCard.querySelectorAll('.team-name');
+            const nextF = nextCard.querySelectorAll('.flag-img');
+            nextN[slot].value = n[win].value;
+            nextF[slot].src = f[win].src;
+            nextF[slot].style.display = 'block';
+        }
+        saveToFirebase();
+    }
 
-        // Слушаем изменения в реальном времени с сервера
-        database.ref('worldCupState').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                isDrawing = true;
-                applyDataToGrid(data);
-                setTimeout(drawLines, 50);
-                isDrawing = false;
+    function drawLines() {
+        const svg = document.getElementById('lines-svg');
+        svg.innerHTML = '';
+        const t = document.querySelector('.tournament').getBoundingClientRect();
+        bracketConfig.forEach(m => {
+            if (m.next) {
+                const c1 = document.getElementById(m.id).getBoundingClientRect();
+                const c2 = document.getElementById(m.next).getBoundingClientRect();
+                const d = `M ${m.col.includes('l') ? c1.right-t.left : c1.left-t.left} ${c1.top+c1.height/2-t.top} L ${c1.right+(c2.left-c1.right)/2-t.left} ${c1.top+c1.height/2-t.top} L ${c1.right+(c2.left-c1.right)/2-t.left} ${c2.top+c2.height/2-t.top} L ${m.col.includes('l') ? c2.left-t.left : c2.right-t.left} ${c2.top+c2.height/2-t.top}`;
+                svg.innerHTML += `<path d="${d}" fill="transparent" stroke="#1e293b" stroke-width="2"/>`;
             }
         });
+    }
 
-        // Отправляем изменения на сервер
-        function saveToFirebase() {
-            if (isDrawing) return; 
-            const state = {};
-            document.querySelectorAll('.match-card').forEach(card => {
-                const names = card.querySelectorAll('.team-name');
-                const scores = card.querySelectorAll('.score');
-                const flags = card.querySelectorAll('.flag-img');
-                
-                state[card.id] = {
-                    n1: names[0].value, s1: scores[0].value, f1: flags[0].src, fd1: flags[0].style.display,
-                    n2: names[1].value, s2: scores[1].value, f2: flags[1].src, fd2: flags[1].style.display
-                };
-            });
-            database.ref('worldCupState').set(state);
-        }
-
-        // Применяем данные, пришедшие с сервера
-        function applyDataToGrid(state) {
-            document.querySelectorAll('.match-card').forEach(card => {
-                const data = state[card.id];
-                if (!data) return;
-                
-                const names = card.querySelectorAll('.team-name');
-                const scores = card.querySelectorAll('.score');
-                const flags = card.querySelectorAll('.flag-img');
-                const pluses = card.querySelectorAll('.flag-plus');
-
-                names[0].value = data.n1 || '';
-                scores[0].value = data.s1 || '';
-                if (data.fd1 === 'block') { flags[0].src = data.f1; flags[0].style.display = 'block'; pluses[0].style.display = 'none'; }
-                else { flags[0].src = ''; flags[0].style.display = 'none'; pluses[0].style.display = 'block'; }
-
-                names[1].value = data.n2 || '';
-                scores[1].value = data.s2 || '';
-                if (data.fd2 === 'block') { flags[1].src = data.f2; flags[1].style.display = 'block'; pluses[1].style.display = 'none'; }
-                else { flags[1].src = ''; flags[1].style.display = 'none'; pluses[1].style.display = 'block'; }
-
-                names[0].classList.remove('winner');
-                names[1].classList.remove('winner');
-                const s1 = parseInt(data.s1); const s2 = parseInt(data.s2);
-                if (!isNaN(s1) && !isNaN(s2) && s1 !== s2) {
-                    if (s1 > s2) names[0].classList.add('winner');
-                    else names[1].classList.add('winner');
-                }
-            });
-        }
-        // ==========================================
-
-        function drawLines() {
-            const svg = document.getElementById('lines-svg');
-            svg.innerHTML = ''; 
-            const tournament = document.querySelector('.tournament');
-            const tRect = tournament.getBoundingClientRect(); 
-
-            bracketConfig.forEach(match => {
-                if (match.next) {
-                    const el1 = document.getElementById(match.id); const el2 = document.getElementById(match.next);
-                    if (!el1 || !el2) return;
-                    const rect1 = el1.getBoundingClientRect(); const rect2 = el2.getBoundingClientRect();
-                    const startY = rect1.top + rect1.height / 2 - tRect.top; const endY = rect2.top + rect2.height / 2 - tRect.top;
-                    let startX, endX;
-                    if (match.col.includes('-l')) { startX = rect1.right - tRect.left; endX = rect2.left - tRect.left; } 
-                    else if (match.col.includes('-r')) { startX = rect1.left - tRect.left; endX = rect2.right - tRect.left; } 
-                    else return;
-
-                    const midX = startX + (endX - startX) / 2;
-                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    path.setAttribute('d', `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`);
-                    path.setAttribute('fill', 'transparent'); path.setAttribute('stroke', '#1e293b'); path.setAttribute('stroke-width', '2');
-                    svg.appendChild(path);
-                }
-            });
-        }
-
-        function attachEvents() {
-            document.querySelectorAll('.flag-input').forEach(input => {
-                input.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(event) {
-                            const container = input.parentElement;
-                            const img = container.querySelector('.flag-img');
-                            const plus = container.querySelector('.flag-plus');
-                            img.src = event.target.result; img.style.display = 'block'; plus.style.display = 'none';
-                            checkWinnerAndAdvance(input.closest('.match-card'));
-                        }
-                        reader.readAsDataURL(file);
-                    }
-                });
-            });
-
-            document.querySelectorAll('.score, .team-name').forEach(input => {
-                input.addEventListener('input', function() { checkWinnerAndAdvance(this.closest('.match-card')); });
-            });
-        }
-
-        function checkWinnerAndAdvance(matchElement) {
-            const scores = matchElement.querySelectorAll('.score');
-            const teamNames = matchElement.querySelectorAll('.team-name');
-            const flags = matchElement.querySelectorAll('.flag-img');
-            
-            let winnerIdx = -1; let loserIdx = -1;
-            const score1 = parseInt(scores[0].value); const score2 = parseInt(scores[1].value);
-            
-            if (!isNaN(score1) && !isNaN(score2) && score1 !== score2) {
-                if (score1 > score2) { winnerIdx = 0; loserIdx = 1; } else { winnerIdx = 1; loserIdx = 0; }
-            }
-
-            const nextMatchId = matchElement.getAttribute('data-next');
-            const slot = parseInt(matchElement.getAttribute('data-slot'), 10);
-
-            if (nextMatchId && !isNaN(slot)) {
-                if (winnerIdx !== -1) pushTeam(nextMatchId, slot, teamNames[winnerIdx].value, flags[winnerIdx].src, flags[winnerIdx].style.display);
-                else pushTeam(nextMatchId, slot, '', '', 'none');
-            }
-
-            if (matchElement.id === 'm29' || matchElement.id === 'm30') {
-                const thirdPlaceSlot = matchElement.id === 'm29' ? 0 : 1;
-                if (loserIdx !== -1) pushTeam('m32', thirdPlaceSlot, teamNames[loserIdx].value, flags[loserIdx].src, flags[loserIdx].style.display);
-                else pushTeam('m32', thirdPlaceSlot, '', '', 'none');
-            }
-            saveToFirebase(); // Сохраняем в облако
-        }
-
-        function pushTeam(matchId, slot, name, flagSrc, flagDisplay) {
-            const nextMatch = document.getElementById(matchId);
-            if (!nextMatch) return;
-            const nextNames = nextMatch.querySelectorAll('.team-name');
-            const nextFlags = nextMatch.querySelectorAll('.flag-img');
-            const nextPluses = nextMatch.querySelectorAll('.flag-plus');
-            
-            if (nextNames[slot]) nextNames[slot].value = name;
-            if (flagDisplay === 'block') {
-                if (nextFlags[slot]) { nextFlags[slot].src = flagSrc; nextFlags[slot].style.display = 'block'; }
-                if (nextPluses[slot]) nextPluses[slot].style.display = 'none';
-            } else {
-                if (nextFlags[slot]) { nextFlags[slot].src = ''; nextFlags[slot].style.display = 'none'; }
-                if (nextPluses[slot]) nextPluses[slot].style.display = 'block';
-            }
-        }
-
-        window.onload = function() {
-            generateBracket();
-            setTimeout(drawLines, 100); 
-        };
-        window.addEventListener('resize', drawLines);
-    </script>
+    window.onload = () => { generateBracket(); setTimeout(drawLines, 200); };
+</script>
 </body>
 </html>
