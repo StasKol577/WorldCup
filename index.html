@@ -20,22 +20,37 @@
         }
 
         .tournament {
-            position: relative; /* НОВОЕ: чтобы линии SVG позиционировались внутри сетки */
+            position: relative;
             display: flex;
-            gap: 30px; /* Немного увеличили расстояние между колонками для линий */
+            gap: 30px;
             width: max-content;
             padding: 20px;
         }
         
-        /* НОВОЕ: Прозрачный холст для линий */
         #lines-svg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Пропускает клики сквозь себя к карточкам */
-            z-index: 0; /* Линии находятся под карточками */
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .col-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .col-header {
+            text-align: center;
+            font-weight: bold;
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            height: 20px;
         }
 
         .col {
@@ -43,6 +58,7 @@
             flex-direction: column;
             justify-content: space-around;
             gap: 15px;
+            flex-grow: 1;
         }
 
         .center-col {
@@ -57,8 +73,8 @@
             padding: 8px;
             width: 180px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            position: relative; /* НОВОЕ: необходимо для z-index */
-            z-index: 1; /* Карточки лежат поверх линий */
+            position: relative;
+            z-index: 1;
         }
         
         .match-title {
@@ -133,20 +149,23 @@
         <div class="tournament">
             <svg id="lines-svg"></svg>
 
-            <div class="col" id="col-16-l"></div>
-            <div class="col" id="col-8-l"></div>
-            <div class="col" id="col-4-l"></div>
-            <div class="col" id="col-2-l"></div>
+            <div class="col-wrapper"><div class="col-header">1/16</div><div class="col" id="col-16-l"></div></div>
+            <div class="col-wrapper"><div class="col-header">1/8</div><div class="col" id="col-8-l"></div></div>
+            <div class="col-wrapper"><div class="col-header">1/4</div><div class="col" id="col-4-l"></div></div>
+            <div class="col-wrapper"><div class="col-header">1/2</div><div class="col" id="col-2-l"></div></div>
             
-            <div class="col center-col">
-                <div id="col-final"></div>
-                <div id="col-third"></div>
+            <div class="col-wrapper">
+                <div class="col-header"></div>
+                <div class="col center-col">
+                    <div id="col-final"></div>
+                    <div id="col-third"></div>
+                </div>
             </div>
             
-            <div class="col" id="col-2-r"></div>
-            <div class="col" id="col-4-r"></div>
-            <div class="col" id="col-8-r"></div>
-            <div class="col" id="col-16-r"></div>
+            <div class="col-wrapper"><div class="col-header">1/2</div><div class="col" id="col-2-r"></div></div>
+            <div class="col-wrapper"><div class="col-header">1/4</div><div class="col" id="col-4-r"></div></div>
+            <div class="col-wrapper"><div class="col-header">1/8</div><div class="col" id="col-8-r"></div></div>
+            <div class="col-wrapper"><div class="col-header">1/16</div><div class="col" id="col-16-r"></div></div>
         </div>
     </div>
 
@@ -203,13 +222,63 @@
             attachEvents();
         }
 
-        // --- НОВЫЙ БЛОК: Функция рисования линий ---
+        // --- НОВЫЙ БЛОК: Сохранение и загрузка данных ---
+        function saveToMemory() {
+            const state = {};
+            document.querySelectorAll('.match-card').forEach(card => {
+                const names = card.querySelectorAll('.team-name');
+                const scores = card.querySelectorAll('.score');
+                const flags = card.querySelectorAll('.flag-img');
+                
+                state[card.id] = {
+                    n1: names[0].value, s1: scores[0].value, f1: flags[0].src, fd1: flags[0].style.display,
+                    n2: names[1].value, s2: scores[1].value, f2: flags[1].src, fd2: flags[1].style.display
+                };
+            });
+            localStorage.setItem('worldCupMemory', JSON.stringify(state));
+        }
+
+        function loadFromMemory() {
+            const savedData = localStorage.getItem('worldCupMemory');
+            if (!savedData) return;
+            
+            const state = JSON.parse(savedData);
+            
+            document.querySelectorAll('.match-card').forEach(card => {
+                const data = state[card.id];
+                if (!data) return;
+                
+                const names = card.querySelectorAll('.team-name');
+                const scores = card.querySelectorAll('.score');
+                const flags = card.querySelectorAll('.flag-img');
+                const pluses = card.querySelectorAll('.flag-plus');
+
+                names[0].value = data.n1 || '';
+                scores[0].value = data.s1 || '';
+                if (data.fd1 === 'block') {
+                    flags[0].src = data.f1; flags[0].style.display = 'block'; pluses[0].style.display = 'none';
+                }
+
+                names[1].value = data.n2 || '';
+                scores[1].value = data.s2 || '';
+                if (data.fd2 === 'block') {
+                    flags[1].src = data.f2; flags[1].style.display = 'block'; pluses[1].style.display = 'none';
+                }
+
+                const s1 = parseInt(data.s1);
+                const s2 = parseInt(data.s2);
+                if (!isNaN(s1) && !isNaN(s2) && s1 !== s2) {
+                    if (s1 > s2) names[0].classList.add('winner');
+                    else names[1].classList.add('winner');
+                }
+            });
+        }
+
         function drawLines() {
             const svg = document.getElementById('lines-svg');
-            svg.innerHTML = ''; // Очищаем старые линии
-            
+            svg.innerHTML = ''; 
             const tournament = document.querySelector('.tournament');
-            const tRect = tournament.getBoundingClientRect(); // Получаем координаты всего поля
+            const tRect = tournament.getBoundingClientRect(); 
 
             bracketConfig.forEach(match => {
                 if (match.next) {
@@ -220,34 +289,26 @@
                     const rect1 = el1.getBoundingClientRect();
                     const rect2 = el2.getBoundingClientRect();
 
-                    // Находим Y-центры (высоту) обеих карточек
                     const startY = rect1.top + rect1.height / 2 - tRect.top;
                     const endY = rect2.top + rect2.height / 2 - tRect.top;
 
                     let startX, endX;
-                    
-                    // Левая ветка идет направо, правая ветка идет налево
                     if (match.col.includes('-l')) {
                         startX = rect1.right - tRect.left;
                         endX = rect2.left - tRect.left;
                     } else if (match.col.includes('-r')) {
                         startX = rect1.left - tRect.left;
                         endX = rect2.right - tRect.left;
-                    } else {
-                        return;
-                    }
+                    } else return;
 
-                    // Точка изгиба линии (ровно посередине между колонками)
                     const midX = startX + (endX - startX) / 2;
 
-                    // Создаем векторный путь
                     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    // M - переместиться в точку начала, L - нарисовать линию в координату
                     const d = `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`;
                     
                     path.setAttribute('d', d);
                     path.setAttribute('fill', 'transparent');
-                    path.setAttribute('stroke', '#1e293b'); // Цвет линии (можно сделать #3b82f6 для ярко-синего)
+                    path.setAttribute('stroke', '#1e293b'); 
                     path.setAttribute('stroke-width', '2');
                     
                     svg.appendChild(path);
@@ -325,6 +386,9 @@
                     pushTeam('m32', thirdPlaceSlot, '', '', 'none');
                 }
             }
+
+            // Вызываем сохранение при любом изменении
+            saveToMemory();
         }
 
         function pushTeam(matchId, slot, name, flagSrc, flagDisplay) {
@@ -335,36 +399,23 @@
             const nextFlags = nextMatch.querySelectorAll('.flag-img');
             const nextPluses = nextMatch.querySelectorAll('.flag-plus');
             
-            if (nextNames[slot]) {
-                nextNames[slot].value = name;
-            }
+            if (nextNames[slot]) nextNames[slot].value = name;
             
             if (flagDisplay === 'block') {
-                if (nextFlags[slot]) {
-                    nextFlags[slot].src = flagSrc;
-                    nextFlags[slot].style.display = 'block';
-                }
-                if (nextPluses[slot]) {
-                    nextPluses[slot].style.display = 'none';
-                }
+                if (nextFlags[slot]) { nextFlags[slot].src = flagSrc; nextFlags[slot].style.display = 'block'; }
+                if (nextPluses[slot]) nextPluses[slot].style.display = 'none';
             } else {
-                if (nextFlags[slot]) {
-                    nextFlags[slot].src = '';
-                    nextFlags[slot].style.display = 'none';
-                }
-                if (nextPluses[slot]) {
-                    nextPluses[slot].style.display = 'block';
-                }
+                if (nextFlags[slot]) { nextFlags[slot].src = ''; nextFlags[slot].style.display = 'none'; }
+                if (nextPluses[slot]) nextPluses[slot].style.display = 'block';
             }
         }
 
         window.onload = function() {
             generateBracket();
-            // Даем браузеру долю секунды на расстановку карточек, после чего рисуем линии
+            loadFromMemory(); // Загружаем данные до отрисовки линий
             setTimeout(drawLines, 50); 
         };
 
-        // Если размер окна изменится (например, повернули телефон), перерисовываем линии
         window.addEventListener('resize', drawLines);
     </script>
 </body>
