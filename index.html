@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road to Budapest - 1/16</title>
+    <style>
+        body {
+            background-color: #0b1120;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .tournament {
+            position: relative; /* НОВОЕ: чтобы линии SVG позиционировались внутри сетки */
+            display: flex;
+            gap: 30px; /* Немного увеличили расстояние между колонками для линий */
+            width: max-content;
+            padding: 20px;
+        }
+        
+        /* НОВОЕ: Прозрачный холст для линий */
+        #lines-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Пропускает клики сквозь себя к карточкам */
+            z-index: 0; /* Линии находятся под карточками */
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .center-col {
+            justify-content: center;
+            gap: 80px;
+        }
+
+        .match-card {
+            background-color: #1e293b;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 8px;
+            width: 180px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            position: relative; /* НОВОЕ: необходимо для z-index */
+            z-index: 1; /* Карточки лежат поверх линий */
+        }
+        
+        .match-title {
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #60a5fa;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .team-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .team-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .flag-container {
+            width: 24px;
+            height: 16px;
+            background-color: #334155;
+            margin-right: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            overflow: hidden;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .flag-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        .flag-plus { font-size: 10px; color: #94a3b8; }
+        .flag-input { display: none; }
+        
+        .team-name, .score {
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            padding: 4px;
+            border-radius: 3px;
+            font-size: 12px;
+            outline: none;
+        }
+        .team-name {
+            flex-grow: 1;
+            width: 50px;
+            margin-right: 5px;
+        }
+        .score {
+            width: 25px;
+            text-align: center;
+        }
+
+        .winner {
+            font-weight: bold;
+            color: #fbbf24;
+            border-color: #fbbf24;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scroll-wrapper">
+        <div class="tournament">
+            <svg id="lines-svg"></svg>
+
+            <div class="col" id="col-16-l"></div>
+            <div class="col" id="col-8-l"></div>
+            <div class="col" id="col-4-l"></div>
+            <div class="col" id="col-2-l"></div>
+            
+            <div class="col center-col">
+                <div id="col-final"></div>
+                <div id="col-third"></div>
+            </div>
+            
+            <div class="col" id="col-2-r"></div>
+            <div class="col" id="col-4-r"></div>
+            <div class="col" id="col-8-r"></div>
+            <div class="col" id="col-16-r"></div>
+        </div>
+    </div>
+
+    <script>
+        const bracketConfig = [
+            { id: 'm1', next: 'm17', slot: 0, col: 'col-16-l' }, { id: 'm2', next: 'm17', slot: 1, col: 'col-16-l' },
+            { id: 'm3', next: 'm18', slot: 0, col: 'col-16-l' }, { id: 'm4', next: 'm18', slot: 1, col: 'col-16-l' },
+            { id: 'm5', next: 'm19', slot: 0, col: 'col-16-l' }, { id: 'm6', next: 'm19', slot: 1, col: 'col-16-l' },
+            { id: 'm7', next: 'm20', slot: 0, col: 'col-16-l' }, { id: 'm8', next: 'm20', slot: 1, col: 'col-16-l' },
+            
+            { id: 'm17', next: 'm25', slot: 0, col: 'col-8-l' }, { id: 'm18', next: 'm25', slot: 1, col: 'col-8-l' },
+            { id: 'm19', next: 'm26', slot: 0, col: 'col-8-l' }, { id: 'm20', next: 'm26', slot: 1, col: 'col-8-l' },
+            
+            { id: 'm25', next: 'm29', slot: 0, col: 'col-4-l' }, { id: 'm26', next: 'm29', slot: 1, col: 'col-4-l' },
+            
+            { id: 'm29', next: 'm31', slot: 0, col: 'col-2-l' }, 
+
+            { id: 'm9', next: 'm21', slot: 0, col: 'col-16-r' }, { id: 'm10', next: 'm21', slot: 1, col: 'col-16-r' },
+            { id: 'm11', next: 'm22', slot: 0, col: 'col-16-r' }, { id: 'm12', next: 'm22', slot: 1, col: 'col-16-r' },
+            { id: 'm13', next: 'm23', slot: 0, col: 'col-16-r' }, { id: 'm14', next: 'm23', slot: 1, col: 'col-16-r' },
+            { id: 'm15', next: 'm24', slot: 0, col: 'col-16-r' }, { id: 'm16', next: 'm24', slot: 1, col: 'col-16-r' },
+            
+            { id: 'm21', next: 'm27', slot: 0, col: 'col-8-r' }, { id: 'm22', next: 'm27', slot: 1, col: 'col-8-r' },
+            { id: 'm23', next: 'm28', slot: 0, col: 'col-8-r' }, { id: 'm24', next: 'm28', slot: 1, col: 'col-8-r' },
+            
+            { id: 'm27', next: 'm30', slot: 0, col: 'col-4-r' }, { id: 'm28', next: 'm30', slot: 1, col: 'col-4-r' },
+            
+            { id: 'm30', next: 'm31', slot: 1, col: 'col-2-r' }, 
+
+            { id: 'm31', next: null, slot: null, col: 'col-final', title: 'Финал' },
+            { id: 'm32', next: null, slot: null, col: 'col-third', title: 'За 3-е место' }
+        ];
+
+        function generateBracket() {
+            bracketConfig.forEach(match => {
+                const titleHtml = match.title ? `<div class="match-title">${match.title}</div>` : '';
+                const cardHtml = `
+                    <div class="match-card" id="${match.id}" data-next="${match.next || ''}" data-slot="${match.slot !== null ? match.slot : ''}">
+                        ${titleHtml}
+                        <div class="team-row">
+                            <label class="flag-container"><input type="file" class="flag-input" accept="image/*"><img class="flag-img" src=""><span class="flag-plus">+</span></label>
+                            <input type="text" class="team-name" placeholder="Команда 1">
+                            <input type="number" class="score" placeholder="0">
+                        </div>
+                        <div class="team-row">
+                            <label class="flag-container"><input type="file" class="flag-input" accept="image/*"><img class="flag-img" src=""><span class="flag-plus">+</span></label>
+                            <input type="text" class="team-name" placeholder="Команда 2">
+                            <input type="number" class="score" placeholder="0">
+                        </div>
+                    </div>
+                `;
+                document.getElementById(match.col).innerHTML += cardHtml;
+            });
+            attachEvents();
+        }
+
+        // --- НОВЫЙ БЛОК: Функция рисования линий ---
+        function drawLines() {
+            const svg = document.getElementById('lines-svg');
+            svg.innerHTML = ''; // Очищаем старые линии
+            
+            const tournament = document.querySelector('.tournament');
+            const tRect = tournament.getBoundingClientRect(); // Получаем координаты всего поля
+
+            bracketConfig.forEach(match => {
+                if (match.next) {
+                    const el1 = document.getElementById(match.id);
+                    const el2 = document.getElementById(match.next);
+                    if (!el1 || !el2) return;
+
+                    const rect1 = el1.getBoundingClientRect();
+                    const rect2 = el2.getBoundingClientRect();
+
+                    // Находим Y-центры (высоту) обеих карточек
+                    const startY = rect1.top + rect1.height / 2 - tRect.top;
+                    const endY = rect2.top + rect2.height / 2 - tRect.top;
+
+                    let startX, endX;
+                    
+                    // Левая ветка идет направо, правая ветка идет налево
+                    if (match.col.includes('-l')) {
+                        startX = rect1.right - tRect.left;
+                        endX = rect2.left - tRect.left;
+                    } else if (match.col.includes('-r')) {
+                        startX = rect1.left - tRect.left;
+                        endX = rect2.right - tRect.left;
+                    } else {
+                        return;
+                    }
+
+                    // Точка изгиба линии (ровно посередине между колонками)
+                    const midX = startX + (endX - startX) / 2;
+
+                    // Создаем векторный путь
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    // M - переместиться в точку начала, L - нарисовать линию в координату
+                    const d = `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`;
+                    
+                    path.setAttribute('d', d);
+                    path.setAttribute('fill', 'transparent');
+                    path.setAttribute('stroke', '#1e293b'); // Цвет линии (можно сделать #3b82f6 для ярко-синего)
+                    path.setAttribute('stroke-width', '2');
+                    
+                    svg.appendChild(path);
+                }
+            });
+        }
+
+        function attachEvents() {
+            document.querySelectorAll('.flag-input').forEach(input => {
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const container = input.parentElement;
+                            const img = container.querySelector('.flag-img');
+                            const plus = container.querySelector('.flag-plus');
+                            img.src = event.target.result;
+                            img.style.display = 'block';
+                            plus.style.display = 'none';
+                            
+                            const matchCard = input.closest('.match-card');
+                            checkWinnerAndAdvance(matchCard);
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.score, .team-name').forEach(input => {
+                input.addEventListener('input', function() {
+                    const matchCard = this.closest('.match-card');
+                    checkWinnerAndAdvance(matchCard);
+                });
+            });
+        }
+
+        function checkWinnerAndAdvance(matchElement) {
+            const scores = matchElement.querySelectorAll('.score');
+            const teamNames = matchElement.querySelectorAll('.team-name');
+            const flags = matchElement.querySelectorAll('.flag-img');
+            
+            const score1 = parseInt(scores[0].value);
+            const score2 = parseInt(scores[1].value);
+            
+            teamNames[0].classList.remove('winner');
+            teamNames[1].classList.remove('winner');
+            
+            let winnerIdx = -1;
+            let loserIdx = -1;
+            
+            if (!isNaN(score1) && !isNaN(score2) && score1 !== score2) {
+                if (score1 > score2) { winnerIdx = 0; loserIdx = 1; } 
+                else { winnerIdx = 1; loserIdx = 0; }
+                teamNames[winnerIdx].classList.add('winner');
+            }
+
+            const nextMatchId = matchElement.getAttribute('data-next');
+            const slotStr = matchElement.getAttribute('data-slot');
+            const slot = parseInt(slotStr, 10);
+
+            if (nextMatchId && !isNaN(slot)) {
+                if (winnerIdx !== -1) {
+                    pushTeam(nextMatchId, slot, teamNames[winnerIdx].value, flags[winnerIdx].src, flags[winnerIdx].style.display);
+                } else {
+                    pushTeam(nextMatchId, slot, '', '', 'none');
+                }
+            }
+
+            if (matchElement.id === 'm29' || matchElement.id === 'm30') {
+                const thirdPlaceSlot = matchElement.id === 'm29' ? 0 : 1;
+                if (loserIdx !== -1) {
+                    pushTeam('m32', thirdPlaceSlot, teamNames[loserIdx].value, flags[loserIdx].src, flags[loserIdx].style.display);
+                } else {
+                    pushTeam('m32', thirdPlaceSlot, '', '', 'none');
+                }
+            }
+        }
+
+        function pushTeam(matchId, slot, name, flagSrc, flagDisplay) {
+            const nextMatch = document.getElementById(matchId);
+            if (!nextMatch) return;
+            
+            const nextNames = nextMatch.querySelectorAll('.team-name');
+            const nextFlags = nextMatch.querySelectorAll('.flag-img');
+            const nextPluses = nextMatch.querySelectorAll('.flag-plus');
+            
+            if (nextNames[slot]) {
+                nextNames[slot].value = name;
+            }
+            
+            if (flagDisplay === 'block') {
+                if (nextFlags[slot]) {
+                    nextFlags[slot].src = flagSrc;
+                    nextFlags[slot].style.display = 'block';
+                }
+                if (nextPluses[slot]) {
+                    nextPluses[slot].style.display = 'none';
+                }
+            } else {
+                if (nextFlags[slot]) {
+                    nextFlags[slot].src = '';
+                    nextFlags[slot].style.display = 'none';
+                }
+                if (nextPluses[slot]) {
+                    nextPluses[slot].style.display = 'block';
+                }
+            }
+        }
+
+        window.onload = function() {
+            generateBracket();
+            // Даем браузеру долю секунды на расстановку карточек, после чего рисуем линии
+            setTimeout(drawLines, 50); 
+        };
+
+        // Если размер окна изменится (например, повернули телефон), перерисовываем линии
+        window.addEventListener('resize', drawLines);
+    </script>
+</body>
+</html>
