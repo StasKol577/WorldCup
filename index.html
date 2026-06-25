@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Road to Budapest - 1/16</title>
+    <title>Road to Budapest - Live</title>
+    
+    <!-- Подключаем Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         body {
             background-color: #0b1120;
@@ -13,134 +18,44 @@
             padding: 20px;
         }
         
-        .scroll-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            padding: 20px 0;
-        }
-
-        .tournament {
-            position: relative;
-            display: flex;
-            gap: 30px;
-            width: max-content;
-            padding: 20px;
-        }
+        .scroll-wrapper { width: 100%; overflow-x: auto; padding: 20px 0; }
+        .tournament { position: relative; display: flex; gap: 30px; width: max-content; padding: 20px; }
+        #lines-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .col-wrapper { display: flex; flex-direction: column; }
         
-        #lines-svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .col-wrapper {
-            display: flex;
-            flex-direction: column;
-        }
-
         .col-header {
-            text-align: center;
-            font-weight: bold;
-            color: #94a3b8;
-            font-size: 14px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            height: 20px;
+            text-align: center; font-weight: bold; color: #94a3b8; font-size: 14px;
+            margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; height: 20px;
         }
 
-        .col {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            gap: 15px;
-            flex-grow: 1;
-        }
-
-        .center-col {
-            justify-content: center;
-            gap: 80px;
-        }
+        .col { display: flex; flex-direction: column; justify-content: space-around; gap: 15px; flex-grow: 1; }
+        .center-col { justify-content: center; gap: 80px; }
 
         .match-card {
-            background-color: #1e293b;
-            border: 2px solid #3b82f6;
-            border-radius: 8px;
-            padding: 8px;
-            width: 180px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            position: relative;
-            z-index: 1;
+            background-color: #1e293b; border: 2px solid #3b82f6; border-radius: 8px;
+            padding: 8px; width: 180px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); position: relative; z-index: 1;
         }
         
-        .match-title {
-            text-align: center;
-            font-size: 12px;
-            font-weight: bold;
-            color: #60a5fa;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-
-        .team-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-        .team-row:last-child {
-            margin-bottom: 0;
-        }
+        .match-title { text-align: center; font-size: 12px; font-weight: bold; color: #60a5fa; margin-bottom: 6px; text-transform: uppercase; }
+        .team-row { display: flex; align-items: center; margin-bottom: 4px; }
+        .team-row:last-child { margin-bottom: 0; }
         
         .flag-container {
-            width: 24px;
-            height: 16px;
-            background-color: #334155;
-            margin-right: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            overflow: hidden;
-            border-radius: 2px;
-            flex-shrink: 0;
+            width: 24px; height: 16px; background-color: #334155; margin-right: 5px;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            overflow: hidden; border-radius: 2px; flex-shrink: 0;
         }
-        .flag-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
+        .flag-container img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .flag-plus { font-size: 10px; color: #94a3b8; }
         .flag-input { display: none; }
         
         .team-name, .score {
-            border: 1px solid #475569;
-            background: #0f172a;
-            color: white;
-            padding: 4px;
-            border-radius: 3px;
-            font-size: 12px;
-            outline: none;
+            border: 1px solid #475569; background: #0f172a; color: white;
+            padding: 4px; border-radius: 3px; font-size: 12px; outline: none;
         }
-        .team-name {
-            flex-grow: 1;
-            width: 50px;
-            margin-right: 5px;
-        }
-        .score {
-            width: 25px;
-            text-align: center;
-        }
-
-        .winner {
-            font-weight: bold;
-            color: #fbbf24;
-            border-color: #fbbf24;
-        }
+        .team-name { flex-grow: 1; width: 50px; margin-right: 5px; }
+        .score { width: 25px; text-align: center; }
+        .winner { font-weight: bold; color: #fbbf24; border-color: #fbbf24; }
     </style>
 </head>
 <body>
@@ -149,19 +64,19 @@
         <div class="tournament">
             <svg id="lines-svg"></svg>
 
+            <!-- Левая часть -->
             <div class="col-wrapper"><div class="col-header">1/16</div><div class="col" id="col-16-l"></div></div>
             <div class="col-wrapper"><div class="col-header">1/8</div><div class="col" id="col-8-l"></div></div>
             <div class="col-wrapper"><div class="col-header">1/4</div><div class="col" id="col-4-l"></div></div>
             <div class="col-wrapper"><div class="col-header">1/2</div><div class="col" id="col-2-l"></div></div>
             
+            <!-- Центр -->
             <div class="col-wrapper">
                 <div class="col-header"></div>
-                <div class="col center-col">
-                    <div id="col-final"></div>
-                    <div id="col-third"></div>
-                </div>
+                <div class="col center-col"><div id="col-final"></div><div id="col-third"></div></div>
             </div>
             
+            <!-- Правая часть -->
             <div class="col-wrapper"><div class="col-header">1/2</div><div class="col" id="col-2-r"></div></div>
             <div class="col-wrapper"><div class="col-header">1/4</div><div class="col" id="col-4-r"></div></div>
             <div class="col-wrapper"><div class="col-header">1/8</div><div class="col" id="col-8-r"></div></div>
@@ -208,22 +123,46 @@
                         <div class="team-row">
                             <label class="flag-container"><input type="file" class="flag-input" accept="image/*"><img class="flag-img" src=""><span class="flag-plus">+</span></label>
                             <input type="text" class="team-name" placeholder="Команда 1">
-                            <input type="number" class="score" placeholder="0">
+                            <input type="number" class="score" placeholder="-">
                         </div>
                         <div class="team-row">
                             <label class="flag-container"><input type="file" class="flag-input" accept="image/*"><img class="flag-img" src=""><span class="flag-plus">+</span></label>
                             <input type="text" class="team-name" placeholder="Команда 2">
-                            <input type="number" class="score" placeholder="0">
+                            <input type="number" class="score" placeholder="-">
                         </div>
                     </div>
                 `;
                 document.getElementById(match.col).innerHTML += cardHtml;
             });
-            attachEvents();
+            attachEvents(); 
         }
 
-        // --- НОВЫЙ БЛОК: Сохранение и загрузка данных ---
-        function saveToMemory() {
+        // ==========================================
+        // БЛОК FIREBASE
+        // ==========================================
+        const firebaseConfig = {
+            // ВСТАВЬ СВОЮ ССЫЛКУ НИЖЕ ВМЕСТО МОЕЙ! Оставь кавычки!
+            databaseURL: "https://sffh-92a72-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        let isDrawing = false; 
+
+        // Слушаем изменения в реальном времени с сервера
+        database.ref('worldCupState').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                isDrawing = true;
+                applyDataToGrid(data);
+                setTimeout(drawLines, 50);
+                isDrawing = false;
+            }
+        });
+
+        // Отправляем изменения на сервер
+        function saveToFirebase() {
+            if (isDrawing) return; 
             const state = {};
             document.querySelectorAll('.match-card').forEach(card => {
                 const names = card.querySelectorAll('.team-name');
@@ -235,15 +174,11 @@
                     n2: names[1].value, s2: scores[1].value, f2: flags[1].src, fd2: flags[1].style.display
                 };
             });
-            localStorage.setItem('worldCupMemory', JSON.stringify(state));
+            database.ref('worldCupState').set(state);
         }
 
-        function loadFromMemory() {
-            const savedData = localStorage.getItem('worldCupMemory');
-            if (!savedData) return;
-            
-            const state = JSON.parse(savedData);
-            
+        // Применяем данные, пришедшие с сервера
+        function applyDataToGrid(state) {
             document.querySelectorAll('.match-card').forEach(card => {
                 const data = state[card.id];
                 if (!data) return;
@@ -255,24 +190,24 @@
 
                 names[0].value = data.n1 || '';
                 scores[0].value = data.s1 || '';
-                if (data.fd1 === 'block') {
-                    flags[0].src = data.f1; flags[0].style.display = 'block'; pluses[0].style.display = 'none';
-                }
+                if (data.fd1 === 'block') { flags[0].src = data.f1; flags[0].style.display = 'block'; pluses[0].style.display = 'none'; }
+                else { flags[0].src = ''; flags[0].style.display = 'none'; pluses[0].style.display = 'block'; }
 
                 names[1].value = data.n2 || '';
                 scores[1].value = data.s2 || '';
-                if (data.fd2 === 'block') {
-                    flags[1].src = data.f2; flags[1].style.display = 'block'; pluses[1].style.display = 'none';
-                }
+                if (data.fd2 === 'block') { flags[1].src = data.f2; flags[1].style.display = 'block'; pluses[1].style.display = 'none'; }
+                else { flags[1].src = ''; flags[1].style.display = 'none'; pluses[1].style.display = 'block'; }
 
-                const s1 = parseInt(data.s1);
-                const s2 = parseInt(data.s2);
+                names[0].classList.remove('winner');
+                names[1].classList.remove('winner');
+                const s1 = parseInt(data.s1); const s2 = parseInt(data.s2);
                 if (!isNaN(s1) && !isNaN(s2) && s1 !== s2) {
                     if (s1 > s2) names[0].classList.add('winner');
                     else names[1].classList.add('winner');
                 }
             });
         }
+        // ==========================================
 
         function drawLines() {
             const svg = document.getElementById('lines-svg');
@@ -282,35 +217,19 @@
 
             bracketConfig.forEach(match => {
                 if (match.next) {
-                    const el1 = document.getElementById(match.id);
-                    const el2 = document.getElementById(match.next);
+                    const el1 = document.getElementById(match.id); const el2 = document.getElementById(match.next);
                     if (!el1 || !el2) return;
-
-                    const rect1 = el1.getBoundingClientRect();
-                    const rect2 = el2.getBoundingClientRect();
-
-                    const startY = rect1.top + rect1.height / 2 - tRect.top;
-                    const endY = rect2.top + rect2.height / 2 - tRect.top;
-
+                    const rect1 = el1.getBoundingClientRect(); const rect2 = el2.getBoundingClientRect();
+                    const startY = rect1.top + rect1.height / 2 - tRect.top; const endY = rect2.top + rect2.height / 2 - tRect.top;
                     let startX, endX;
-                    if (match.col.includes('-l')) {
-                        startX = rect1.right - tRect.left;
-                        endX = rect2.left - tRect.left;
-                    } else if (match.col.includes('-r')) {
-                        startX = rect1.left - tRect.left;
-                        endX = rect2.right - tRect.left;
-                    } else return;
+                    if (match.col.includes('-l')) { startX = rect1.right - tRect.left; endX = rect2.left - tRect.left; } 
+                    else if (match.col.includes('-r')) { startX = rect1.left - tRect.left; endX = rect2.right - tRect.left; } 
+                    else return;
 
                     const midX = startX + (endX - startX) / 2;
-
                     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    const d = `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`;
-                    
-                    path.setAttribute('d', d);
-                    path.setAttribute('fill', 'transparent');
-                    path.setAttribute('stroke', '#1e293b'); 
-                    path.setAttribute('stroke-width', '2');
-                    
+                    path.setAttribute('d', `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`);
+                    path.setAttribute('fill', 'transparent'); path.setAttribute('stroke', '#1e293b'); path.setAttribute('stroke-width', '2');
                     svg.appendChild(path);
                 }
             });
@@ -326,12 +245,8 @@
                             const container = input.parentElement;
                             const img = container.querySelector('.flag-img');
                             const plus = container.querySelector('.flag-plus');
-                            img.src = event.target.result;
-                            img.style.display = 'block';
-                            plus.style.display = 'none';
-                            
-                            const matchCard = input.closest('.match-card');
-                            checkWinnerAndAdvance(matchCard);
+                            img.src = event.target.result; img.style.display = 'block'; plus.style.display = 'none';
+                            checkWinnerAndAdvance(input.closest('.match-card'));
                         }
                         reader.readAsDataURL(file);
                     }
@@ -339,10 +254,7 @@
             });
 
             document.querySelectorAll('.score, .team-name').forEach(input => {
-                input.addEventListener('input', function() {
-                    const matchCard = this.closest('.match-card');
-                    checkWinnerAndAdvance(matchCard);
-                });
+                input.addEventListener('input', function() { checkWinnerAndAdvance(this.closest('.match-card')); });
             });
         }
 
@@ -351,56 +263,37 @@
             const teamNames = matchElement.querySelectorAll('.team-name');
             const flags = matchElement.querySelectorAll('.flag-img');
             
-            const score1 = parseInt(scores[0].value);
-            const score2 = parseInt(scores[1].value);
-            
-            teamNames[0].classList.remove('winner');
-            teamNames[1].classList.remove('winner');
-            
-            let winnerIdx = -1;
-            let loserIdx = -1;
+            let winnerIdx = -1; let loserIdx = -1;
+            const score1 = parseInt(scores[0].value); const score2 = parseInt(scores[1].value);
             
             if (!isNaN(score1) && !isNaN(score2) && score1 !== score2) {
-                if (score1 > score2) { winnerIdx = 0; loserIdx = 1; } 
-                else { winnerIdx = 1; loserIdx = 0; }
-                teamNames[winnerIdx].classList.add('winner');
+                if (score1 > score2) { winnerIdx = 0; loserIdx = 1; } else { winnerIdx = 1; loserIdx = 0; }
             }
 
             const nextMatchId = matchElement.getAttribute('data-next');
-            const slotStr = matchElement.getAttribute('data-slot');
-            const slot = parseInt(slotStr, 10);
+            const slot = parseInt(matchElement.getAttribute('data-slot'), 10);
 
             if (nextMatchId && !isNaN(slot)) {
-                if (winnerIdx !== -1) {
-                    pushTeam(nextMatchId, slot, teamNames[winnerIdx].value, flags[winnerIdx].src, flags[winnerIdx].style.display);
-                } else {
-                    pushTeam(nextMatchId, slot, '', '', 'none');
-                }
+                if (winnerIdx !== -1) pushTeam(nextMatchId, slot, teamNames[winnerIdx].value, flags[winnerIdx].src, flags[winnerIdx].style.display);
+                else pushTeam(nextMatchId, slot, '', '', 'none');
             }
 
             if (matchElement.id === 'm29' || matchElement.id === 'm30') {
                 const thirdPlaceSlot = matchElement.id === 'm29' ? 0 : 1;
-                if (loserIdx !== -1) {
-                    pushTeam('m32', thirdPlaceSlot, teamNames[loserIdx].value, flags[loserIdx].src, flags[loserIdx].style.display);
-                } else {
-                    pushTeam('m32', thirdPlaceSlot, '', '', 'none');
-                }
+                if (loserIdx !== -1) pushTeam('m32', thirdPlaceSlot, teamNames[loserIdx].value, flags[loserIdx].src, flags[loserIdx].style.display);
+                else pushTeam('m32', thirdPlaceSlot, '', '', 'none');
             }
-
-            // Вызываем сохранение при любом изменении
-            saveToMemory();
+            saveToFirebase(); // Сохраняем в облако
         }
 
         function pushTeam(matchId, slot, name, flagSrc, flagDisplay) {
             const nextMatch = document.getElementById(matchId);
             if (!nextMatch) return;
-            
             const nextNames = nextMatch.querySelectorAll('.team-name');
             const nextFlags = nextMatch.querySelectorAll('.flag-img');
             const nextPluses = nextMatch.querySelectorAll('.flag-plus');
             
             if (nextNames[slot]) nextNames[slot].value = name;
-            
             if (flagDisplay === 'block') {
                 if (nextFlags[slot]) { nextFlags[slot].src = flagSrc; nextFlags[slot].style.display = 'block'; }
                 if (nextPluses[slot]) nextPluses[slot].style.display = 'none';
@@ -412,10 +305,8 @@
 
         window.onload = function() {
             generateBracket();
-            loadFromMemory(); // Загружаем данные до отрисовки линий
-            setTimeout(drawLines, 50); 
+            setTimeout(drawLines, 100); 
         };
-
         window.addEventListener('resize', drawLines);
     </script>
 </body>
