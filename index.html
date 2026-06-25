@@ -182,7 +182,12 @@
             const names = card.querySelectorAll('.team-name');
             const scores = card.querySelectorAll('.score');
             const flags = card.querySelectorAll('.flag-img');
-            state[card.id] = { n1: names[0].value, s1: scores[0].value, f1: flags[0].src, n2: names[1].value, s2: scores[1].value, f2: flags[1].src };
+            state[card.id] = { 
+                n0: n[0].value, 
+                f0: (n[0].value && f[0].style.display === 'block') ? f[0].src : '', 
+                n1: n[1].value, 
+                f1: (n[1].value && f[1].style.display === 'block') ? f[1].src : '' 
+            };
         });
         database.ref('worldCupState').set(state);
     }
@@ -196,8 +201,8 @@
                 const names = card.querySelectorAll('.team-name');
                 const scores = card.querySelectorAll('.score');
                 const flags = card.querySelectorAll('.flag-img');
-                names[0].value = d.n1; scores[0].value = d.s1; flags[0].src = d.f1; flags[0].style.display = d.f1 ? 'block' : 'none';
-                names[1].value = d.n2; scores[1].value = d.s2; flags[1].src = d.f2; flags[1].style.display = d.f2 ? 'block' : 'none';
+                names[0].value = d.n1; scores[0].value = d.s1; flags[0].src = d.f1; flags[0].style.display = (d.f1 && d.n1) ? 'block' : 'none';
+                names[1].value = d.n2; scores[1].value = d.s2; flags[1].src = d.f2; flags[1].style.display = (d.f2 && d.n2) ? 'block' : 'none';
             });
             drawLines();
         }
