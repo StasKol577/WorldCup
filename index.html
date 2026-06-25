@@ -151,12 +151,12 @@
                     ${match.title ? `<div style="text-align:center; font-size:12px; color:#60a5fa">${match.title}</div>` : ''}
                     <div class="team-row">
                         <div class="flag-container"><img class="flag-img" src=""></div>
-                        <input type="text" class="team-name" list="countries" placeholder="Команда">
+                        <input type="text" class="team-name" list="countries" placeholder="${match.p1 || 'Команда'}">
                         <input type="number" class="score" placeholder="-">
                     </div>
                     <div class="team-row">
                         <div class="flag-container"><img class="flag-img" src=""></div>
-                        <input type="text" class="team-name" list="countries" placeholder="Команда">
+                        <input type="text" class="team-name" list="countries" placeholder="${match.p2 || 'Команда'}">
                         <input type="number" class="score" placeholder="-">
                     </div>
                 </div>`;
