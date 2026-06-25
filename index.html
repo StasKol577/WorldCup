@@ -99,7 +99,7 @@
 <script>
 
     const bracketConfig = [
-        // Левая сторона (из image_3f9c68.png)
+    // 1/16 финала (Левая сторона)
         { id: 'm1', next: 'm17', slot: 0, col: 'col-16-l', p1: '1-е место гр. E', p2: '3-е место гр. A/B/C/D/F' },
         { id: 'm2', next: 'm17', slot: 1, col: 'col-16-l', p1: 'Победитель гр. I', p2: '3-е место гр. C/D/F/G/H' },
         { id: 'm3', next: 'm18', slot: 0, col: 'col-16-l', p1: '2-е место гр. A', p2: '2-е место гр. B' },
@@ -108,8 +108,18 @@
         { id: 'm6', next: 'm19', slot: 1, col: 'col-16-l', p1: 'Победитель гр. H', p2: '2-е место гр. J' },
         { id: 'm7', next: 'm20', slot: 0, col: 'col-16-l', p1: '1-е место гр. D', p2: '3-е место гр. B/I' },
         { id: 'm8', next: 'm20', slot: 1, col: 'col-16-l', p1: 'Победитель гр. G', p2: '3-е место гр. A/H/I/J' },
+        
+        // 1/8 финала (Левая сторона)
+        { id: 'm17', next: 'm25', slot: 0, col: 'col-8-l' }, { id: 'm18', next: 'm25', slot: 1, col: 'col-8-l' },
+        { id: 'm19', next: 'm26', slot: 0, col: 'col-8-l' }, { id: 'm20', next: 'm26', slot: 1, col: 'col-8-l' },
+        
+        // 1/4 финала (Левая сторона)
+        { id: 'm25', next: 'm29', slot: 0, col: 'col-4-l' }, { id: 'm26', next: 'm29', slot: 1, col: 'col-4-l' },
+        
+        // 1/2 финала (Левая сторона)
+        { id: 'm29', next: 'm31', slot: 0, col: 'col-2-l' }, 
     
-        // Правая сторона (из image_3f9c8b.png)
+        // 1/16 финала (Правая сторона)
         { id: 'm9', next: 'm21', slot: 0, col: 'col-16-r', p1: '1-е место гр. C', p2: '2-е место гр. F' },
         { id: 'm10', next: 'm21', slot: 1, col: 'col-16-r', p1: '2-е место гр. E', p2: '2-е место гр. I' },
         { id: 'm11', next: 'm22', slot: 0, col: 'col-16-r', p1: '1-е место гр. A', p2: '3-е место гр. C/E/F/H/I' },
@@ -117,8 +127,21 @@
         { id: 'm13', next: 'm23', slot: 0, col: 'col-16-r', p1: '1-е место гр. J', p2: '2-е место гр. H' },
         { id: 'm14', next: 'm23', slot: 1, col: 'col-16-r', p1: '2-е место гр. D', p2: '2-е место гр. G' },
         { id: 'm15', next: 'm24', slot: 0, col: 'col-16-r', p1: '1-е место гр. B', p2: '3-е место гр. E/F/G/I/J' },
-        { id: 'm16', next: 'm24', slot: 1, col: 'col-16-r', p1: 'Победитель гр. K', p2: '3-е место гр. D/E/I/J/L' }
-        // ... остальная логика связи (m17-m32) остается прежней
+        { id: 'm16', next: 'm24', slot: 1, col: 'col-16-r', p1: 'Победитель гр. K', p2: '3-е место гр. D/E/I/J/L' },
+        
+        // 1/8 финала (Правая сторона)
+        { id: 'm21', next: 'm27', slot: 0, col: 'col-8-r' }, { id: 'm22', next: 'm27', slot: 1, col: 'col-8-r' },
+        { id: 'm23', next: 'm28', slot: 0, col: 'col-8-r' }, { id: 'm24', next: 'm28', slot: 1, col: 'col-8-r' },
+        
+        // 1/4 финала (Правая сторона)
+        { id: 'm27', next: 'm30', slot: 0, col: 'col-4-r' }, { id: 'm28', next: 'm30', slot: 1, col: 'col-4-r' },
+        
+        // 1/2 финала (Правая сторона)
+        { id: 'm30', next: 'm31', slot: 1, col: 'col-2-r' }, 
+    
+        // Финал и 3-е место
+        { id: 'm31', next: null, slot: null, col: 'col-final', title: 'Финал' },
+        { id: 'm32', next: null, slot: null, col: 'col-third', title: 'За 3-е место' }
     ];
 
     function generateBracket() {
